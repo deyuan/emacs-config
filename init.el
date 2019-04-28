@@ -49,6 +49,9 @@
   ;; Scroll smoothly
   (setq scroll-conservatively 200)
   (setq scroll-margin 5)
+  ;; Mouse and touch pad
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
+  (setq mouse-wheel-progressive-speed nil)
   ;; Tabs: width and expand
   (setq-default tab-width 4)
   (setq-default indent-tabs-mode nil)
@@ -73,6 +76,11 @@
   (window-numbering-mode t)
   )
 
+;; Window move: Meta + Arrow
+(progn
+  (windmove-default-keybindings 'meta)
+  )
+
 ;; Autocomplete
 (progn
   (require 'icomplete)
@@ -82,15 +90,10 @@
   (icomplete-mode 1)
   )
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (company window-numbering dracula-theme))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; Which key
+(progn
+  (require 'which-key)
+  (setq which-key-idle-delay 1.0)
+  (which-key-mode)
+  )
+
