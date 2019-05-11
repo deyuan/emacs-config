@@ -59,6 +59,7 @@
   (global-set-key (kbd "C-x f") nil)
   (global-set-key (kbd "C-x C-b") nil)
   (global-set-key (kbd "C-x C-k") nil)
+  (global-set-key (kbd "<help>") nil)
   ;; Use y/n instead of yes/no
   (defalias 'yes-or-no-p 'y-or-n-p)
   ;; Scroll smoothly
@@ -90,6 +91,7 @@
 
 ;; Whitespace: show tabs and trailing spaces in some modes
 (progn
+  (require 'whitespace)
   (setq whitespace-style '(face tabs trailing tab-mark))
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (lambda () (whitespace-mode t))))
@@ -97,15 +99,23 @@
 
 ;; Window numbering: M-1/2/3
 (progn
-  ;; (require 'window-numbering)
+  (require 'window-numbering)
   ;; (custom-set-faces '(window-numbering-face ((t (:foreground "cyan1" :weight bold)))))
-  ;; (window-numbering-mode t)
+  (window-numbering-mode t)
   )
 
 ;; Window move: Meta + Arrow
 (progn
   (require 'windmove)
   (windmove-default-keybindings 'meta)
+  ;; (setq org-replace-disputed-keys t)
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (define-key org-mode-map (kbd "<M-right>") nil)
+              (define-key org-mode-map (kbd "<M-left>") nil)
+              (define-key org-mode-map (kbd "<M-up>") nil)
+              (define-key org-mode-map (kbd "<M-down>") nil)
+              ))
   )
 
 ;; Autocomplete
@@ -141,11 +151,19 @@
   (global-set-key [remap execute-extended-command] 'smex)
   )
 
+;; IDO for buffer switching only
+(progn
+  (require 'ido)
+  (ido-mode 'buffer)
+  (setq ido-enable-flex-matching t)
+  )
+
 ;; Ace Jump
 (progn
   (require 'ace-jump-mode)
   (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
   )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -169,4 +187,5 @@
   "Switch to or create *shell*<5>"
   (interactive)
   (my-switch-to-or-create-shell "*shell*<5>"))
+
 
