@@ -75,11 +75,8 @@
   (global-auto-revert-mode t)
   ;; Show column number
   (setq column-number-mode t)
-  ;; Tabs: width and expand
-  (setq-default tab-width 4)
-  (setq-default indent-tabs-mode nil)
-  ;; Require new line at the end of file
-  (setq require-final-newline t)
+  ;; Show end of buffer
+  (setq-default indicate-empty-lines t)
   ;; Parentheses
   (show-paren-mode t)
   ;; Type to overwrite highlighted region
@@ -87,6 +84,20 @@
   ;; Shell: make prompts read only
   (setq comint-prompt-read-only t)
   (setq comint-scroll-to-bottom-on-input t)
+  ;; Move focus to help window
+  (setq help-window-select t)
+  ;; Highlight current cursor line
+  (global-hl-line-mode t)
+  )
+
+;; Programming
+(progn
+  ;; Tabs: width and expand
+  (setq-default tab-width 4)
+  (setq-default indent-tabs-mode nil)
+  ;; Fix c/c++ indentation
+  (setq c-default-style "linux")
+  (setq c-basic-offset 2)
   )
 
 ;; Whitespace: show tabs and trailing spaces in some modes
@@ -154,14 +165,42 @@
 ;; IDO for buffer switching only
 (progn
   (require 'ido)
-  (ido-mode 'buffer)
+  ;; ido find file may have performance issue
+  ;; (ido-mode 1)
+  (ido-mode 'buffers)
   (setq ido-enable-flex-matching t)
+  (setq ido-max-prospects 100)
+  ;; Disable tab pop up buffer
+  (setq ido-completion-buffer nil)
   )
 
 ;; Ace Jump
 (progn
   (require 'ace-jump-mode)
   (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+  (global-set-key (kbd "<f8>") 'ace-jump-mode)
+  )
+
+;; Magit
+(progn
+  (require 'magit)
+  )
+
+;; Yasnippet
+(progn
+  (require 'yasnippet)
+  (setq yas-snippet-dirs `("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+  ;; Use fundamental mode snippets everywhere
+  (add-hook 'yas-minor-mode-hook (lambda () (yas-activate-extra-mode 'fundamental-mode)))
+  ;; Use IDO for yas-insert-snippet
+  (setq yas-prompt-functions '(yas-ido-prompt))
+  ;; Key shortcut
+  (global-set-key (kbd "<f7>") 'yas-insert-snippet)
+  ;; Don't use TAB
+  (define-key yas-minor-mode-map [(tab)] nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
   )
 
 
