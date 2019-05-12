@@ -171,6 +171,7 @@
 ;; IDO for buffer switching only
 (progn
   (require 'ido)
+  (setq ido-save-directory-list-file (expand-file-name ".ido.last" user-emacs-directory))
   ;; ido find file may have performance issue
   ;; (ido-mode 1)
   (ido-mode 'buffers)
