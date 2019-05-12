@@ -108,6 +108,12 @@
     (add-hook hook (lambda () (whitespace-mode t))))
   )
 
+;; Winner mode: C-c + Left/Right
+(progn
+  (require 'winner)
+  (winner-mode 1)
+  )
+
 ;; Window numbering: M-1/2/3
 (progn
   (require 'window-numbering)
