@@ -11,6 +11,7 @@
 ;; M-g-g : goto-line
 ;; M-f, M-b, M-backspace, M-d : word navigation and deletion
 ;; M-<, M-> : goto head/tail
+;; M-% : query-replace : Use C-q C-j to replace with newline
 ;; <Tab> : indent-for-tab-command : fix indentation of region
 ;; M-x find-file-at-point : vim's gf
 ;; M-x chmod : chmod
@@ -87,7 +88,8 @@
   ;; Move focus to help window
   (setq help-window-select t)
   ;; Highlight current cursor line
-  (global-hl-line-mode t)
+  ;;(global-hl-line-mode t)
+  (set-cursor-color "green")
   )
 
 ;; Programming
