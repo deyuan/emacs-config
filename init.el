@@ -236,4 +236,14 @@
   (interactive)
   (my-switch-to-or-create-shell "*shell*<5>"))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Remove ^M characters
+(defun my-rm-ctrl-m ()
+  "Remove ^M characters"
+  (interactive)
+  (beginning-of-buffer)
+  (replace-string "" "")
+  )
+
 
