@@ -31,21 +31,48 @@
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
   (package-initialize)
   (require 'seq)
-  (let* ((my-packages '(dracula-theme window-numbering which-key smex anzu
+  (let* ((my-packages '(zenburn-theme solarized-theme
+                        which-key smex anzu winum
                         ace-jump-mode yasnippet magit evil evil-anzu))
          (missing-packages (seq-remove 'package-installed-p my-packages)))
     (when missing-packages
       (package-refresh-contents)
       (mapc #'package-install missing-packages))))
 
+;; Theme
+(progn
+  ;; Theme
+  (load-theme 'zenburn t)
+  ;;(load-theme 'solarized-dark t)
+  ;;(load-theme 'solarized-light t)
+  ;;(set-cursor-color "green")
+  ;; Highlight active mode line
+  ;;(set-face-attribute 'mode-line nil :background "purple4")
+  ;;(set-face-attribute 'mode-line-inactive nil :background "gray25")
+  ;;(set-face-attribute 'window-divider nil :foreground "gray60")
+  )
+
 ;; Common
 (progn
-  ;; Put backup files in a central place
+  ;; Startup
+  (setq inhibit-startup-screen t)
+  ;; Frame
+  (setq use-file-dialog nil)
+  (setq use-dialog-box nil)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (if (eq system-type 'gnu/linux) (menu-bar-mode -1))
+  ;; Divider
+  (setq window-divider-default-right-width 1)
+  (window-divider-mode)
+  ;; Frame title
+  (setq frame-title-format '((:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
+  ;; Backup file location
   (setq backup-directory-alist `(("." . "~/.emacs.d/backup")))
-  ;; Move custom file
+  ;; Custom file location
   (setq custom-file "~/.emacs.d/custom.el")
   (load custom-file 'noerror)
-  ;; Unset C-z, C-x f
+  ;; Unset some keys
   (global-set-key (kbd "C-z") nil)
   (global-set-key (kbd "C-x f") nil)
   (global-set-key (kbd "C-x C-b") nil)
@@ -57,13 +84,12 @@
   (setq scroll-conservatively 200)
   (setq scroll-margin 5)
   (add-hook 'shell-mode-hook (lambda () (make-local-variable 'scroll-margin) (setq scroll-margin 0)))
-  ;; (setq scroll-preserve-screen-position 'always)
   ;; Mouse and touch pad
   (setq mouse-wheel-scroll-amount '(2 ((shift) . 1) ((control) . nil)))
   (setq mouse-wheel-progressive-speed nil)
   (setq mouse-yank-at-point t)
   ;; Reload files if changed on disk
-  (global-auto-revert-mode t)
+  (global-auto-revert-mode 1)
   ;; Show column number
   (setq column-number-mode t)
   ;; Show end of buffer
@@ -77,32 +103,8 @@
   (setq comint-scroll-to-bottom-on-input t)
   ;; Move focus to help window
   (setq help-window-select t)
-  ;; Highlight current cursor line
-  ;;(global-hl-line-mode t)
-  (set-cursor-color "green")
   ;; Search backspace behavior
   (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
-  )
-
-;; Display and Theme
-(progn
-  ;; Frame
-  (setq use-file-dialog nil)
-  (setq use-dialog-box nil)
-  (setq inhibit-startup-screen t)
-  (tool-bar-mode -1)
-  ;; (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (setq window-divider-default-right-width 1)
-  (window-divider-mode)
-  (setq frame-title-format '((:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
-  ;; Theme
-  (require 'dracula-theme)
-  (load-theme 'dracula t)
-  ;; Highlight active mode line
-  (set-face-attribute 'mode-line nil :background "purple4")
-  (set-face-attribute 'mode-line-inactive nil :background "gray25")
-  (set-face-attribute 'window-divider nil :foreground "gray60")
   )
 
 ;; Completion
@@ -151,10 +153,22 @@
               (define-key org-mode-map (kbd "<M-up>") nil)
               (define-key org-mode-map (kbd "<M-down>") nil)
               ))
-  ;; Window numbering: M-1/2/3
-  (require 'window-numbering)
-  ;; (custom-set-faces '(window-numbering-face ((t (:foreground "cyan1" :weight bold)))))
-  (window-numbering-mode t)
+  ;; Winum: M-1/2/3
+  (setq winum-keymap
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
+          (define-key map (kbd "M-1") 'winum-select-window-1)
+          (define-key map (kbd "M-2") 'winum-select-window-2)
+          (define-key map (kbd "M-3") 'winum-select-window-3)
+          (define-key map (kbd "M-4") 'winum-select-window-4)
+          (define-key map (kbd "M-5") 'winum-select-window-5)
+          (define-key map (kbd "M-6") 'winum-select-window-6)
+          (define-key map (kbd "M-7") 'winum-select-window-7)
+          (define-key map (kbd "M-8") 'winum-select-window-8)
+          map))
+  (require 'winum)
+  (set-face-attribute 'winum-face nil :weight 'bold)
+  (winum-mode)
   )
 
 ;; Search
