@@ -25,36 +25,26 @@
 ;; M-x occur : show occurrence
 ;; M-x list-colors-display : list all colors
 
-(package-initialize)
-
-;; Use MELPA package repository
-(add-to-list 'package-archives '("MELPA" . "https://melpa.org/packages/") t)
-
-;; Display and Theme
+;; Install packages if needed
 (progn
-  ;; Frame
-  (setq use-file-dialog nil)
-  (setq use-dialog-box nil)
-  (setq inhibit-startup-screen t)
-  (tool-bar-mode -1)
-  ;; (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (setq window-divider-default-right-width 1)
-  (window-divider-mode)
-  (setq frame-title-format '((:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
-  ;; Theme
-  (require 'dracula-theme)
-  (load-theme 'dracula t)
-  ;; Highlight active mode line
-  (set-face-attribute 'mode-line nil :background "purple4")
-  (set-face-attribute 'mode-line-inactive nil :background "gray25")
-  (set-face-attribute 'window-divider nil :foreground "gray60")
-  )
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (package-initialize)
+  (require 'seq)
+  (let* ((my-packages '(dracula-theme window-numbering which-key smex anzu
+                        ace-jump-mode yasnippet magit evil evil-anzu))
+         (missing-packages (seq-remove 'package-installed-p my-packages)))
+    (when missing-packages
+      (package-refresh-contents)
+      (mapc #'package-install missing-packages))))
 
 ;; Common
 (progn
   ;; Put backup files in a central place
-  (setq backup-directory-alist `(("." . "~/.emacs.save")))
+  (setq backup-directory-alist `(("." . "~/.emacs.d/backup")))
+  ;; Move custom file
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file 'noerror)
   ;; Unset C-z, C-x f
   (global-set-key (kbd "C-z") nil)
   (global-set-key (kbd "C-x f") nil)
@@ -90,6 +80,47 @@
   ;; Highlight current cursor line
   ;;(global-hl-line-mode t)
   (set-cursor-color "green")
+  ;; Search backspace behavior
+  (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
+  )
+
+;; Display and Theme
+(progn
+  ;; Frame
+  (setq use-file-dialog nil)
+  (setq use-dialog-box nil)
+  (setq inhibit-startup-screen t)
+  (tool-bar-mode -1)
+  ;; (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (setq window-divider-default-right-width 1)
+  (window-divider-mode)
+  (setq frame-title-format '((:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
+  ;; Theme
+  (require 'dracula-theme)
+  (load-theme 'dracula t)
+  ;; Highlight active mode line
+  (set-face-attribute 'mode-line nil :background "purple4")
+  (set-face-attribute 'mode-line-inactive nil :background "gray25")
+  (set-face-attribute 'window-divider nil :foreground "gray60")
+  )
+
+;; Completion
+(progn
+  ;; icomplete
+  (setq completion-ignore-case t)
+  (setq read-file-name-completion-ignore-case t)
+  (setq read-buffer-completion-ignore-case t)
+  (icomplete-mode 1)
+  ;; IDO for buffer switching only
+  (setq ido-save-directory-list-file "~/.emacs.d/.ido.last")
+  ;; ido find file may have performance issue
+  ;; (ido-mode 1)
+  (ido-mode 'buffers)
+  (setq ido-enable-flex-matching t)
+  (setq ido-max-prospects 100)
+  ;; Disable tab pop up buffer
+  (setq ido-completion-buffer nil)
   )
 
 ;; Programming
@@ -100,32 +131,17 @@
   ;; Fix c/c++ indentation
   (setq c-default-style "linux")
   (setq c-basic-offset 2)
-  )
-
-;; Whitespace: show tabs and trailing spaces in some modes
-(progn
-  (require 'whitespace)
+  ;; Whitespace: show tabs and trailing spaces in some modes
   (setq whitespace-style '(face tabs trailing tab-mark))
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (lambda () (whitespace-mode t))))
   )
 
-;; Winner mode: C-c + Left/Right
+;; Window switching
 (progn
-  (require 'winner)
+  ;; Winner mode: C-c + Left/Right
   (winner-mode 1)
-  )
-
-;; Window numbering: M-1/2/3
-(progn
-  (require 'window-numbering)
-  ;; (custom-set-faces '(window-numbering-face ((t (:foreground "cyan1" :weight bold)))))
-  (window-numbering-mode t)
-  )
-
-;; Window move: Meta + Arrow
-(progn
-  (require 'windmove)
+  ;; Window move: Meta + Arrow
   (windmove-default-keybindings 'meta)
   ;; (setq org-replace-disputed-keys t)
   (add-hook 'org-mode-hook
@@ -135,21 +151,14 @@
               (define-key org-mode-map (kbd "<M-up>") nil)
               (define-key org-mode-map (kbd "<M-down>") nil)
               ))
-  )
-
-;; Autocomplete
-(progn
-  (require 'icomplete)
-  (setq completion-ignore-case t)
-  (setq read-file-name-completion-ignore-case t)
-  (setq read-buffer-completion-ignore-case t)
-  (icomplete-mode 1)
+  ;; Window numbering: M-1/2/3
+  (require 'window-numbering)
+  ;; (custom-set-faces '(window-numbering-face ((t (:foreground "cyan1" :weight bold)))))
+  (window-numbering-mode t)
   )
 
 ;; Search
 (progn
-  (require 'isearch)
-  (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
   (require 'anzu)
   (global-anzu-mode)
   (setq anzu-mode-lighter "")
@@ -158,7 +167,7 @@
 ;; Which Key
 (progn
   (require 'which-key)
-  (setq which-key-idle-delay 2.0)
+  (setq which-key-idle-delay 1.0)
   (setq which-key-lighter "")
   (which-key-mode)
   )
@@ -166,21 +175,8 @@
 ;; Smex
 (progn
   (require 'smex)
-  (setq-default smex-save-file (expand-file-name ".smex-items" user-emacs-directory))
+  (setq-default smex-save-file "~/.emacs.d/.smex-items")
   (global-set-key [remap execute-extended-command] 'smex)
-  )
-
-;; IDO for buffer switching only
-(progn
-  (require 'ido)
-  (setq ido-save-directory-list-file (expand-file-name ".ido.last" user-emacs-directory))
-  ;; ido find file may have performance issue
-  ;; (ido-mode 1)
-  (ido-mode 'buffers)
-  (setq ido-enable-flex-matching t)
-  (setq ido-max-prospects 100)
-  ;; Disable tab pop up buffer
-  (setq ido-completion-buffer nil)
   )
 
 ;; Ace Jump
@@ -212,6 +208,27 @@
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
   )
 
+;; Evil
+(progn
+  ;; Use default emacs keybindings in insert state
+  (setq evil-disable-insert-state-bindings t)
+  (require 'evil)
+  ;; Default state
+  (setq evil-default-state 'emacs)
+  (evil-mode 1)
+  ;; Normal state j/k based on visual line
+  (define-key evil-normal-state-map "j" 'evil-next-visual-line)
+  (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
+  ;; Config cursor colors and shapes
+  (setq evil-emacs-state-cursor '("green" box))
+  (setq evil-normal-state-cursor '("cyan" box))
+  (setq evil-visual-state-cursor '("cyan" box))
+  (setq evil-insert-state-cursor '("cyan" bar))
+  (setq evil-replace-state-cursor '("cyan" hbar))
+  (setq evil-operator-state-cursor '("cyan" evil-half-cursor))
+  ;; Show search count with n/N in evil nornal mode
+  (require 'evil-anzu)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
