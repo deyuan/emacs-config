@@ -233,6 +233,9 @@
   ;; Normal state j/k based on visual line
   (define-key evil-normal-state-map "j" 'evil-next-visual-line)
   (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
+  ;; Disable :q and :wq
+  (evil-ex-define-cmd "q" nil)
+  (evil-ex-define-cmd "wq" nil)
   ;; Config cursor colors and shapes
   (setq evil-emacs-state-cursor '("green" box))
   (setq evil-normal-state-cursor '("cyan" box))
