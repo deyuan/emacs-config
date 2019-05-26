@@ -31,9 +31,10 @@
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
   (package-initialize)
   (require 'seq)
-  (let* ((my-packages '(zenburn-theme solarized-theme
+  (let* ((my-packages '(zenburn-theme solarized-theme color-theme-sanityinc-tomorrow
                         which-key smex anzu winum
-                        ace-jump-mode yasnippet magit evil evil-anzu))
+                        ace-jump-mode yasnippet magit yaml-mode
+                        evil evil-anzu))
          (missing-packages (seq-remove 'package-installed-p my-packages)))
     (when missing-packages
       (package-refresh-contents)
@@ -42,9 +43,10 @@
 ;; Theme
 (progn
   ;; Theme
-  (load-theme 'zenburn t)
+  ;;(load-theme 'zenburn t)
   ;;(load-theme 'solarized-dark t)
   ;;(load-theme 'solarized-light t)
+  (load-theme 'sanityinc-tomorrow-bright t)
   ;;(set-cursor-color "green")
   ;; Highlight active mode line
   ;;(set-face-attribute 'mode-line nil :background "purple4")
@@ -105,6 +107,8 @@
   (setq help-window-select t)
   ;; Search backspace behavior
   (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
+  ;; Cursor blink
+  (setq-default blink-cursor-interval 0.4)
   )
 
 ;; Completion
@@ -137,6 +141,8 @@
   (setq whitespace-style '(face tabs trailing tab-mark))
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (lambda () (whitespace-mode t))))
+  ;; Electric pair mode
+  (electric-pair-mode)
   )
 
 ;; Window switching
@@ -246,6 +252,15 @@
   ;; Show search count with n/N in evil nornal mode
   (require 'evil-anzu)
   )
+
+;; Shift + Enter
+(defun sanityinc/newline-at-end-of-line ()
+  "Move to end of line, enter a newline, and reindent."
+  (interactive)
+  (move-end-of-line 1)
+  (newline-and-indent))
+(global-set-key (kbd "S-<return>") 'sanityinc/newline-at-end-of-line)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
