@@ -1,20 +1,15 @@
 # emacs-config
-* My emacs configuration - Keep it simple and efficient
-* Prefer default key bindings and light-weight packages
+* My emacs configuration
+* Prefer default key bindings
 
 ## Packages
-* Window Management
-  * `winner`: Restore previosu window configuration with `C-c <left>`, `C-c <right>`
-  * `window-numbering`: Switch among windows with `M-1`, `M-2`, ..., `M-0`
-  * `windmove`: Switch among windows with `M-<left>`, `M-<right>`, `M-<up>`, `M-<down>`
-* Tool Hints
-  * `icomplete`: For file finding completion
-  * `which-key`: For key binding completion
-  * `smex`: For `M-x` completion
-  * `ido`: For buffer switching completion
-  * `anzu`: Show count of search results
-* Programming
-  * `magit`: For git support
-  * `ace-jump-mode`: Jump to anywhere on screen
-  * `yasnippet`: Snippet management
-
+* `zenburn-theme`
+* `solarized-theme`
+* `winum`: Switch among windows with `M-1`, `M-2`, ...
+* `which-key`: For key binding completion
+* `smex`: For `M-x` completion
+* `anzu`: Show count of search results
+* `magit`: Git support
+* `ace-jump-mode`: Jump to anywhere on screen
+* `yasnippet`: Snippet management
+* `evil`, `evil-anzu`: Minimal evil support
