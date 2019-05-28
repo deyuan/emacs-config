@@ -1,15 +1,6 @@
 # emacs-config
-* My emacs configuration
-* Prefer default key bindings
+* My emacs configuration: Self-contained, single-file, light-weight.
+* Mininum emacs vertion: 25.1
 
-## Packages
-* `zenburn-theme`
-* `solarized-theme`
-* `winum`: Switch among windows with `M-1`, `M-2`, ...
-* `which-key`: For key binding completion
-* `smex`: For `M-x` completion
-* `anzu`: Show count of search results
-* `magit`: Git support
-* `ace-jump-mode`: Jump to anywhere on screen
-* `yasnippet`: Snippet management
-* `evil`, `evil-anzu`: Minimal evil support
+## References
+* https://github.com/purcell/emacs.d
