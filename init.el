@@ -10,7 +10,7 @@
 ;;------------------------------------------------------------------------------
 (progn
   ;; Enable error backtrace
-  (setq debug-on-error t)
+  ;(setq debug-on-error t)
   ;; Minimum emacs version
   (let ((minver "25.1"))
     (when (version< emacs-version minver)
@@ -33,7 +33,7 @@
   ;; Install required packages if needed
   (require 'seq)
   (let ((my-packages '(color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized
-                       which-key smex anzu winum
+                       which-key smex anzu winum mode-line-bell beacon
                        ace-jump-mode yasnippet magit yaml-mode vlf expand-region
                        evil evil-anzu)))
     (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
@@ -360,6 +360,20 @@
   ;; Shell: make prompts read only
   (setq comint-prompt-read-only t)
   (setq comint-scroll-to-bottom-on-input t)
+  )
+
+;; Mode line bell
+(progn
+  (require 'mode-line-bell)
+  (add-hook 'after-init-hook 'mode-line-bell-mode)
+  )
+
+;; Beacon: Highlight cursor location
+(progn
+  (require 'beacon)
+  (setq-default beacon-lighter "")
+  (setq-default beacon-size 20)
+  (add-hook 'after-init-hook 'beacon-mode)
   )
 
 ;;------------------------------------------------------------------------------
