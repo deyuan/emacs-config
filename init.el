@@ -10,7 +10,7 @@
 ;;------------------------------------------------------------------------------
 (progn
   ;; Enable error backtrace
-  ;(setq debug-on-error t)
+  ;;(setq debug-on-error t)
   ;; Minimum emacs version
   (let ((minver "25.1"))
     (when (version< emacs-version minver)
@@ -68,6 +68,8 @@
 (progn
   ;; If you don't customize it, this is the theme you get.
   (setq-default custom-enabled-themes '(sanityinc-tomorrow-bright))
+  ;; Load theme now to avoid flashing
+  (load-theme 'sanityinc-tomorrow-bright t)
   (add-hook 'after-init-hook 'sanityinc/reapply-themes)
   )
 
