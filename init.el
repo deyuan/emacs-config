@@ -362,6 +362,8 @@
   ;; Shell: make prompts read only
   (setq comint-prompt-read-only t)
   (setq comint-scroll-to-bottom-on-input t)
+  ;; Shell: open in current window
+  (push (cons "\\*shell\\*" display-buffer--same-window-action) display-buffer-alist)
   )
 
 ;; Mode line bell
