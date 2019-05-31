@@ -33,7 +33,7 @@
   ;; Install required packages if needed
   (require 'seq)
   (let ((my-packages '(color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized
-                       which-key smex anzu winum mode-line-bell beacon
+                       which-key smex anzu winum mode-line-bell beacon bind-key
                        ace-jump-mode yasnippet magit yaml-mode vlf expand-region
                        evil evil-anzu)))
     (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
@@ -130,8 +130,6 @@
       (set-window-buffer (next-window) other-buffer))))
 
 (progn
-  ;; Winner mode: C-c + Left/Right
-  (winner-mode 1)
   ;; When splitting window, show (other-buffer) in the new window
   (global-set-key (kbd "C-x 2") (my-split-window-func-with-other-buffer 'split-window-vertically))
   (global-set-key (kbd "C-x 3") (my-split-window-func-with-other-buffer 'split-window-horizontally))
@@ -140,6 +138,8 @@
   (global-set-key (kbd "C-x _") 'my-split-window-vertically-instead)
   ;; Move focus to help window
   (setq help-window-select t)
+  ;; Winner mode: C-c + Left/Right
+  (winner-mode 1)
   )
 
 ;; Window move: Meta + Arrow
@@ -193,12 +193,6 @@
 ;;------------------------------------------------------------------------------
 ;; Editing Utils
 ;;------------------------------------------------------------------------------
-(defun sanityinc/newline-at-end-of-line ()
-  "Move to end of line, enter a newline, and reindent."
-  (interactive)
-  (move-end-of-line 1)
-  (newline-and-indent))
-
 (progn
   ;; Electric pair mode
   (electric-pair-mode t)
@@ -235,11 +229,6 @@
   (setq-default indicate-empty-lines t)
   ;; Parentheses
   (show-paren-mode t)
-  ;; Expand region
-  (require 'expand-region)
-  (global-set-key (kbd "C-=") 'er/expand-region)
-  ;; Shift + Enter
-  (global-set-key (kbd "S-<return>") 'sanityinc/newline-at-end-of-line)
   ;; Fix c/c++ indentation
   (setq c-default-style "linux")
   (setq c-basic-offset 2)
@@ -247,21 +236,13 @@
   (setq whitespace-style '(face tabs trailing tab-mark))
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (lambda () (whitespace-mode t))))
-  ;; Ace jump mode
-  (require 'ace-jump-mode)
-  (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
-  (global-set-key (kbd "<f8>") 'ace-jump-mode)
   )
 
-;; Unset keys
 (progn
-  (global-set-key (kbd "C-z") nil) ; suspend-frame
-  (global-set-key (kbd "C-x f") nil) ; set-fill-column
-  (global-set-key (kbd "C-x C-b") nil) ; list-buffers
-  (global-set-key (kbd "C-x C-k") nil) ; kmacro
-  (global-set-key (kbd "C-x C-u") nil) ; upcase-region
-  (global-set-key (kbd "C-x C-l") nil) ; downcase-region
-  (global-set-key (kbd "<help>") nil)
+  ;; Expand region
+  (require 'expand-region)
+  ;; Ace jump mode
+  (require 'ace-jump-mode)
   )
 
 ;; Very large file
@@ -283,8 +264,6 @@
   (add-hook 'yas-minor-mode-hook (lambda () (yas-activate-extra-mode 'fundamental-mode)))
   ;; Use IDO for yas-insert-snippet
   (setq yas-prompt-functions '(yas-ido-prompt))
-  ;; Key shortcut
-  (global-set-key (kbd "<f7>") 'yas-insert-snippet)
   ;; Don't use TAB
   (define-key yas-minor-mode-map [(tab)] nil)
   (define-key yas-minor-mode-map (kbd "TAB") nil)
@@ -305,13 +284,6 @@
   ;; Disable :q and :wq
   (evil-ex-define-cmd "q" nil)
   (evil-ex-define-cmd "wq" nil)
-  ;; Config cursor colors and shapes
-  ;(setq evil-emacs-state-cursor '("green" box))
-  ;(setq evil-normal-state-cursor '("cyan" box))
-  ;(setq evil-visual-state-cursor '("cyan" box))
-  ;(setq evil-insert-state-cursor '("cyan" bar))
-  ;(setq evil-replace-state-cursor '("cyan" hbar))
-  ;(setq evil-operator-state-cursor '("cyan" evil-half-cursor))
   ;; Show search count with n/N in evil nornal mode
   (require 'evil-anzu)
   )
@@ -365,10 +337,14 @@
 (progn
   ;; Use y/n instead of yes/no
   (defalias 'yes-or-no-p 'y-or-n-p)
-  ;; Shell: make prompts read only
+  )
+
+;; Shell
+(progn
+  ;; Make prompts read only
   (setq comint-prompt-read-only t)
   (setq comint-scroll-to-bottom-on-input t)
-  ;; Shell: open in current window
+  ;; Open in current window
   (push (cons "\\*shell\\*" display-buffer--same-window-action) display-buffer-alist)
   )
 
@@ -387,6 +363,50 @@
   )
 
 ;;------------------------------------------------------------------------------
+;; Key Bindings
+;;------------------------------------------------------------------------------
+;; Unset keys
+(progn
+  (global-set-key (kbd "C-z") nil) ; suspend-frame
+  (global-set-key (kbd "C-x f") nil) ; set-fill-column
+  (global-set-key (kbd "C-x C-b") nil) ; list-buffers
+  (global-set-key (kbd "C-x C-k") nil) ; kmacro
+  (global-set-key (kbd "C-x C-u") nil) ; upcase-region
+  (global-set-key (kbd "C-x C-l") nil) ; downcase-region
+  (global-set-key (kbd "<help>") nil)
+  )
+
+(defun sanityinc/newline-at-end-of-line ()
+  "Move to end of line, enter a newline, and reindent."
+  (interactive)
+  (move-end-of-line 1)
+  (newline-and-indent))
+
+(defun sanityinc/open-shell (s)
+  "Switch to or create a shell with buffer name s"
+  (if (get-buffer s) (switch-to-buffer s) (shell s)))
+(defun shell1 () "" (interactive) (sanityinc/open-shell "*shell*<1>"))
+(defun shell2 () "" (interactive) (sanityinc/open-shell "*shell*<2>"))
+(defun shell3 () "" (interactive) (sanityinc/open-shell "*shell*<3>"))
+(defun shell4 () "" (interactive) (sanityinc/open-shell "*shell*<4>"))
+(defun shell5 () "" (interactive) (sanityinc/open-shell "*shell*<5>"))
+
+;; Keybindings
+(progn
+  (require 'bind-key)
+  (bind-key* "S-<return>" 'sanityinc/newline-at-end-of-line)
+  (bind-key* "C-=" 'er/expand-region)
+  (bind-key* "C-j j" 'ace-jump-mode)
+  (bind-key* "C-j C-j" 'ace-jump-mode)
+  (bind-key* "C-j y" 'yas-insert-snippet)
+  (bind-key* "C-j 1" 'shell1)
+  (bind-key* "C-j 2" 'shell2)
+  (bind-key* "C-j 3" 'shell3)
+  (bind-key* "C-j 4" 'shell4)
+  (bind-key* "C-j 5" 'shell5)
+  )
+
+;;------------------------------------------------------------------------------
 ;; Variables configured via the interactive 'customize' interface
 ;;------------------------------------------------------------------------------
 (when (file-exists-p custom-file)
@@ -395,27 +415,6 @@
 ;;------------------------------------------------------------------------------
 ;; My Elisp Utilities
 ;;------------------------------------------------------------------------------
-
-;; Aliases for multiple shells
-(defun my-switch-to-or-create-shell (s)
-  "Switch to or create a shell with buffer name s"
-  (if (get-buffer s) (switch-to-buffer s) (shell s)))
-(defun shell2 ()
-  "Switch to or create *shell*<2>"
-  (interactive)
-  (my-switch-to-or-create-shell "*shell*<2>"))
-(defun shell3 ()
-  "Switch to or create *shell*<3>"
-  (interactive)
-  (my-switch-to-or-create-shell "*shell*<3>"))
-(defun shell4 ()
-  "Switch to or create *shell*<4>"
-  (interactive)
-  (my-switch-to-or-create-shell "*shell*<4>"))
-(defun shell5 ()
-  "Switch to or create *shell*<5>"
-  (interactive)
-  (my-switch-to-or-create-shell "*shell*<5>"))
 
 ;; Remove ^M characters
 (defun my-rm-ctrl-m ()
