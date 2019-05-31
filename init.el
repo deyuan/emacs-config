@@ -35,7 +35,7 @@
   (let ((my-packages '(color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized
                        which-key smex anzu winum mode-line-bell beacon bind-key
                        ace-jump-mode yasnippet magit yaml-mode vlf expand-region
-                       evil evil-anzu)))
+                       )))
     (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
       (when missing-packages
         (package-refresh-contents)
@@ -268,24 +268,6 @@
   (define-key yas-minor-mode-map [(tab)] nil)
   (define-key yas-minor-mode-map (kbd "TAB") nil)
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  )
-
-;; Evil
-(progn
-  ;; Use default emacs keybindings in insert state
-  (setq evil-disable-insert-state-bindings t)
-  (require 'evil)
-  ;; Default state
-  (setq evil-default-state 'emacs)
-  (evil-mode 1)
-  ;; Normal state j/k based on visual line
-  (define-key evil-normal-state-map "j" 'evil-next-visual-line)
-  (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
-  ;; Disable :q and :wq
-  (evil-ex-define-cmd "q" nil)
-  (evil-ex-define-cmd "wq" nil)
-  ;; Show search count with n/N in evil nornal mode
-  (require 'evil-anzu)
   )
 
 ;;------------------------------------------------------------------------------
