@@ -91,6 +91,11 @@
   (window-divider-mode)
   ;; Frame title
   (setq frame-title-format '((:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
+  ;; Default font
+  (if (eq system-type 'gnu/linux) (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-12")))
+  (if (eq system-type 'darwin) (add-to-list 'default-frame-alist '(font . "Menlo-14")))
+  ;; Show file size
+  (size-indication-mode 1)
   )
 
 ;;------------------------------------------------------------------------------
@@ -182,6 +187,7 @@
   (setq anzu-mode-lighter "")
   (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
   (global-set-key [remap query-replace] 'anzu-query-replace)
+  (setq anzu-search-threshold 500)
   )
 
 ;;------------------------------------------------------------------------------
