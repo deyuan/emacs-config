@@ -2,8 +2,8 @@
 ;;; Commentary:
 ;; A self-contained single-file emacs configuration
 ;; Author: Deyuan Guo
-;; - Interactive functions use prefix my-
-;; - Internal functions use prefix sanityinc/
+;; - Interactive helper functions use prefix sanityinc/
+;; - Other functions use prefix my-
 ;; Reference:
 ;; - https://github.com/purcell/emacs.d
 ;; - https://github.com/redguardtoo/emacs.d
@@ -21,7 +21,7 @@
       (error "This config requires emacs v%s or higher" minver)))
   )
 
-(defun sanityinc/install-packages-if-needed (my-packages)
+(defun my-install-packages-if-needed (my-packages)
   "Install packages if needed. Don't refresh if all packages are installed."
   (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
     (when missing-packages
@@ -46,14 +46,14 @@
                        which-key smex anzu winum mode-line-bell beacon bind-key
                        ace-jump-mode yasnippet magit yaml-mode vlf expand-region
                        )))
-    (sanityinc/install-packages-if-needed my-packages))
+    (my-install-packages-if-needed my-packages))
   )
 
 ;;------------------------------------------------------------------------------
 ;; Theme
 ;;------------------------------------------------------------------------------
 
-(defun sanityinc/reapply-themes ()
+(defun my-reapply-themes ()
   "Forcibly load the themes listed in `custom-enabled-themes'."
   (dolist (theme custom-enabled-themes)
     (unless (custom-theme-p theme)
@@ -64,29 +64,29 @@
   "Activate a day color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-tomorrow-day))
-  (sanityinc/reapply-themes))
+  (my-reapply-themes))
 (defun my-night-theme ()
   "Activate a night color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-tomorrow-bright))
-  (sanityinc/reapply-themes))
+  (my-reapply-themes))
 (defun my-light-theme ()
   "Activate a light color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-solarized-light))
-  (sanityinc/reapply-themes))
+  (my-reapply-themes))
 (defun my-dark-theme ()
   "Activate a dark color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-solarized-dark))
-  (sanityinc/reapply-themes))
+  (my-reapply-themes))
 
 (progn
   ;; Default theme
   (setq-default custom-enabled-themes '(sanityinc-tomorrow-bright))
   ;; Load theme now to avoid screen flashing
   (load-theme 'sanityinc-tomorrow-bright t)
-  (add-hook 'after-init-hook 'sanityinc/reapply-themes)
+  (add-hook 'after-init-hook 'my-reapply-themes)
   )
 
 ;;------------------------------------------------------------------------------
@@ -155,8 +155,6 @@
   ;; Toggle horizontally or vertically split windows
   (global-set-key (kbd "C-x |") 'sanityinc/split-window-horizontally-instead)
   (global-set-key (kbd "C-x _") 'sanityinc/split-window-vertically-instead)
-  ;; Move focus to help window
-  (setq help-window-select t)
   ;; Winner mode: C-c + Left/Right
   (winner-mode 1)
   )
@@ -178,7 +176,6 @@
   ;; Winum: M-1/2/3
   (setq winum-keymap
         (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
           (define-key map (kbd "M-1") 'winum-select-window-1)
           (define-key map (kbd "M-2") 'winum-select-window-2)
           (define-key map (kbd "M-3") 'winum-select-window-3)
@@ -187,6 +184,8 @@
           (define-key map (kbd "M-6") 'winum-select-window-6)
           (define-key map (kbd "M-7") 'winum-select-window-7)
           (define-key map (kbd "M-8") 'winum-select-window-8)
+          (define-key map (kbd "M-9") 'winum-select-window-9)
+          (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
           map))
   (require 'winum)
   (set-face-attribute 'winum-face nil :weight 'bold)
@@ -251,11 +250,15 @@
   (show-paren-mode t)
   ;; Fix c/c++ indentation
   (setq c-default-style "linux")
-  (setq c-basic-offset 2)
+  (setq c-basic-offset 4)
   ;; Whitespace: show tabs and trailing spaces in some modes
   (setq whitespace-style '(face tabs trailing tab-mark))
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (lambda () (whitespace-mode t))))
+  )
+
+(progn
+  (setq org-support-shift-select t)
   )
 
 (progn
@@ -385,37 +388,51 @@
   (global-set-key (kbd "<help>") nil)
   )
 
-(defun sanityinc/open-shell (s)
+(defun my-open-shell (s)
   "Switch to or create a shell with buffer name s"
   (if (get-buffer s) (switch-to-buffer s) (shell s)))
 
-(defun sanityinc/bind-key (key func &optional desc)
-  "Bind a key sequence to func, with a which-key description string"
+(defvar my-lead-key "M-SPC" "My lead key for emacs")
+(defun my-bind-key (key func &optional desc)
+  "Bind a key sequence to func, with which-key description"
   (bind-key* key func)
-  (which-key-add-key-based-replacements key desc)
-  )
-
-(defun sanityinc/bind-to-lead-key (key func &optional desc)
-  "Bind a lead key sequence to func, with a which-key description string"
-  (let ((key-seq (concat "M-SPC " key))) (sanityinc/bind-key key-seq func desc))
-  (let ((key-seq (concat "<f8> " key))) (sanityinc/bind-key key-seq func desc))
-  )
+  (which-key-add-key-based-replacements key desc))
+(defun my-bind-to-lead-key (key func &optional desc)
+  "Bind a key sequence after lead key to func"
+  (let ((key-seq (concat my-lead-key " " key))) (my-bind-key key-seq func desc)))
+(defun my-bind-to-double-lead-key (key func &optional desc)
+  "Bind a key sequence after double lead keys to func"
+  (my-bind-to-lead-key (concat my-lead-key " " key) func desc))
 
 (progn
   (require 'bind-key)
   ;; Normal key bindings
-  (sanityinc/bind-key "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
+  (my-bind-key "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
+  (my-bind-key "<f5>" 'rectangle-mark-mode "rectangle-mark")
+  (my-bind-key "<f6>" 'string-rectangle "rectangle-edit")
+  (my-bind-key "<f7>" 'yas-insert-snippet nil)
   ;; Lead key bindings
-  (sanityinc/bind-to-lead-key "y" 'yas-insert-snippet nil)
-  (sanityinc/bind-to-lead-key "r" 'rectangle-mark-mode nil)
-  (sanityinc/bind-to-lead-key "t" 'string-rectangle nil)
-  (sanityinc/bind-to-lead-key "m" (lambda() (interactive) (beginning-of-buffer) (replace-string "\r" "")) "remove-^M")
-  (sanityinc/bind-to-lead-key "k" 'kill-buffer-and-window nil)
-  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell")
-  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell")
-  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell")
-  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell")
-  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell")
+  (my-bind-to-lead-key "SPC" 'just-one-space nil)
+  (my-bind-to-lead-key "s1" (lambda() (interactive) (my-open-shell "*shell*<1>")) "shell-1")
+  (my-bind-to-lead-key "s2" (lambda() (interactive) (my-open-shell "*shell*<2>")) "shell-2")
+  (my-bind-to-lead-key "s3" (lambda() (interactive) (my-open-shell "*shell*<3>")) "shell-3")
+  (my-bind-to-lead-key "s4" (lambda() (interactive) (my-open-shell "*shell*<4>")) "shell-4")
+  (my-bind-to-lead-key "s5" (lambda() (interactive) (my-open-shell "*shell*<5>")) "shell-5")
+  (my-bind-to-lead-key "jj" 'ace-jump-word-mode nil)
+  (my-bind-to-lead-key "jc" 'ace-jump-char-mode nil)
+  (my-bind-to-lead-key "jl" 'ace-jump-line-mode nil)
+  (my-bind-to-lead-key "k1" (lambda() (interactive) (winum-select-window-1 t)) "delete-window-1")
+  (my-bind-to-lead-key "k2" (lambda() (interactive) (winum-select-window-2 t)) "delete-window-2")
+  (my-bind-to-lead-key "k3" (lambda() (interactive) (winum-select-window-3 t)) "delete-window-3")
+  (my-bind-to-lead-key "k4" (lambda() (interactive) (winum-select-window-4 t)) "delete-window-4")
+  (my-bind-to-lead-key "k5" (lambda() (interactive) (winum-select-window-5 t)) "delete-window-5")
+  (my-bind-to-lead-key "k6" (lambda() (interactive) (winum-select-window-6 t)) "delete-window-6")
+  (my-bind-to-lead-key "k7" (lambda() (interactive) (winum-select-window-7 t)) "delete-window-7")
+  (my-bind-to-lead-key "k8" (lambda() (interactive) (winum-select-window-8 t)) "delete-window-8")
+  (my-bind-to-lead-key "k9" (lambda() (interactive) (winum-select-window-9 t)) "delete-window-9")
+  (my-bind-to-lead-key "k0" (lambda() (interactive) (winum-select-window-0-or-10 t)) "delete-window-10")
+  (my-bind-to-lead-key "km" (lambda() (interactive) (beginning-of-buffer) (replace-string "\r" "")) "delete ^M")
+  (my-bind-to-lead-key "y" 'yas-insert-snippet nil)
   )
 
 ;;------------------------------------------------------------------------------
