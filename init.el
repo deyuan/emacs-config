@@ -404,8 +404,7 @@
 (progn
   ;; Key Bindings
   (require 'bind-key)
-  ;; Shift + Enter
-  (bind-key* "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
+  (sanityinc/bind-key "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
   ;; Yasnippet
   (sanityinc/bind-to-lead-key "y" 'yas-insert-snippet nil)
   ;; Rectangle
