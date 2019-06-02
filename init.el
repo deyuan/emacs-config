@@ -397,27 +397,25 @@
 
 (defun sanityinc/bind-to-lead-key (key func &optional desc)
   "Bind a lead key sequence to func, with a which-key description string"
-  (let ((key-seq (concat "C-j " key))) (sanityinc/bind-key key-seq func desc))
+  (let ((key-seq (concat "M-SPC " key))) (sanityinc/bind-key key-seq func desc))
   (let ((key-seq (concat "<f8> " key))) (sanityinc/bind-key key-seq func desc))
   )
 
 (progn
-  ;; Key Bindings
   (require 'bind-key)
+  ;; Normal key bindings
   (sanityinc/bind-key "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
-  ;; Yasnippet
+  ;; Lead key bindings
   (sanityinc/bind-to-lead-key "y" 'yas-insert-snippet nil)
-  ;; Rectangle
   (sanityinc/bind-to-lead-key "r" 'rectangle-mark-mode nil)
   (sanityinc/bind-to-lead-key "t" 'string-rectangle nil)
-  ;; Shell
-  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell-1")
-  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell-2")
-  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell-3")
-  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell-4")
-  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell-5")
-  ;; Remove ^M characters
   (sanityinc/bind-to-lead-key "m" (lambda() (interactive) (beginning-of-buffer) (replace-string "\r" "")) "remove-^M")
+  (sanityinc/bind-to-lead-key "k" 'kill-buffer-and-window nil)
+  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell")
+  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell")
+  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell")
+  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell")
+  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell")
   )
 
 ;;------------------------------------------------------------------------------
