@@ -2,32 +2,41 @@
 ;;; Commentary:
 ;; A self-contained single-file emacs configuration
 ;; Author: Deyuan Guo
-;; Reference: https://github.com/purcell/emacs.d
+;; - Interactive functions use prefix my-
+;; - Internal functions use prefix sanityinc/
+;; Reference:
+;; - https://github.com/purcell/emacs.d
+;; - https://github.com/redguardtoo/emacs.d
 ;;; Code:
 
 ;;------------------------------------------------------------------------------
 ;; Bootstrap
 ;;------------------------------------------------------------------------------
 (progn
-  ;; Enable error backtrace
   ;;(setq debug-on-error t)
-  ;; Minimum emacs version
+  ;; Mininum version required
   (let ((minver "25.1"))
     (when (version< emacs-version minver)
       (error "This config requires emacs v%s or higher" minver)))
-  ;; Custom file location
-  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
   )
 
-;; Initialize packages
+(defun sanityinc/install-packages-if-needed (my-packages)
+  "Install packages if needed. Don't refresh if all packages are installed."
+  (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
+    (when missing-packages
+      (package-refresh-contents)
+      (mapc #'package-install missing-packages))))
+
 (progn
+  ;; Custom file location
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  ;; Each emacs version uses a separate directory
   (require 'package)
-  ;; Install into separate package dirs for each Emacs version, to prevent bytecode incompatibility
   (let ((versioned-package-dir
          (expand-file-name (format "elpa-%s.%s" emacs-major-version emacs-minor-version)
                            user-emacs-directory)))
     (setq package-user-dir versioned-package-dir))
-  ;; MELPA
+  ;; Add melpa
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
   (package-initialize)
   ;; Install required packages if needed
@@ -36,16 +45,12 @@
                        which-key smex anzu winum mode-line-bell beacon bind-key
                        ace-jump-mode yasnippet magit yaml-mode vlf expand-region
                        )))
-    (let ((missing-packages (seq-remove 'package-installed-p my-packages)))
-      (when missing-packages
-        (package-refresh-contents)
-        (mapc #'package-install missing-packages))))
+    (sanityinc/install-packages-if-needed my-packages))
   )
 
 ;;------------------------------------------------------------------------------
 ;; Theme
 ;;------------------------------------------------------------------------------
-;; Ensure that themes will be applied even if they have not been customized
 (defun sanityinc/reapply-themes ()
   "Forcibly load the themes listed in `custom-enabled-themes'."
   (dolist (theme custom-enabled-themes)
@@ -53,22 +58,31 @@
       (load-theme theme)))
   (custom-set-variables `(custom-enabled-themes (quote ,custom-enabled-themes))))
 
-(defun my-light-theme ()
-  "Activate a light color theme."
+(defun my-day-theme ()
+  "Activate a day color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-tomorrow-day))
   (sanityinc/reapply-themes))
-
-(defun my-dark-theme ()
-  "Activate a dark color theme."
+(defun my-night-theme ()
+  "Activate a night color theme."
   (interactive)
   (setq custom-enabled-themes '(sanityinc-tomorrow-bright))
   (sanityinc/reapply-themes))
+(defun my-light-theme ()
+  "Activate a light color theme."
+  (interactive)
+  (setq custom-enabled-themes '(sanityinc-solarized-light))
+  (sanityinc/reapply-themes))
+(defun my-dark-theme ()
+  "Activate a dark color theme."
+  (interactive)
+  (setq custom-enabled-themes '(sanityinc-solarized-dark))
+  (sanityinc/reapply-themes))
 
 (progn
-  ;; If you don't customize it, this is the theme you get.
+  ;; Default theme
   (setq-default custom-enabled-themes '(sanityinc-tomorrow-bright))
-  ;; Load theme now to avoid flashing
+  ;; Load theme now to avoid screen flashing
   (load-theme 'sanityinc-tomorrow-bright t)
   (add-hook 'after-init-hook 'sanityinc/reapply-themes)
   )
@@ -83,6 +97,7 @@
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
   (if (eq system-type 'gnu/linux) (menu-bar-mode -1))
+  ;; Border
   (let ((no-border '(internal-border-width . 0)))
     (add-to-list 'default-frame-alist no-border)
     (add-to-list 'initial-frame-alist no-border))
@@ -94,14 +109,14 @@
   ;; Default font
   (if (eq system-type 'gnu/linux) (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-12")))
   (if (eq system-type 'darwin) (add-to-list 'default-frame-alist '(font . "Menlo-14")))
-  ;; Show file size
+  ;; Show file size in mode line
   (size-indication-mode 1)
   )
 
 ;;------------------------------------------------------------------------------
 ;; Windows
 ;;------------------------------------------------------------------------------
-(defun my-split-window-func-with-other-buffer (split-function)
+(defun sanityinc/split-window-func-with-other-buffer (split-function)
   (lambda (&optional arg)
     "Split this window and switch to the new window unless ARG is provided."
     (interactive "P")
@@ -111,7 +126,7 @@
       (unless arg
         (select-window target-window)))))
 
-(defun my-split-window-horizontally-instead ()
+(defun sanityinc/split-window-horizontally-instead ()
   "Kill any other windows and re-split such that the current window is on the top half of the frame."
   (interactive)
   (let ((other-buffer (and (next-window) (window-buffer (next-window)))))
@@ -120,7 +135,7 @@
     (when other-buffer
       (set-window-buffer (next-window) other-buffer))))
 
-(defun my-split-window-vertically-instead ()
+(defun sanityinc/split-window-vertically-instead ()
   "Kill any other windows and re-split such that the current window is on the left half of the frame."
   (interactive)
   (let ((other-buffer (and (next-window) (window-buffer (next-window)))))
@@ -131,19 +146,19 @@
 
 (progn
   ;; When splitting window, show (other-buffer) in the new window
-  (global-set-key (kbd "C-x 2") (my-split-window-func-with-other-buffer 'split-window-vertically))
-  (global-set-key (kbd "C-x 3") (my-split-window-func-with-other-buffer 'split-window-horizontally))
+  (global-set-key (kbd "C-x 2") (sanityinc/split-window-func-with-other-buffer 'split-window-vertically))
+  (global-set-key (kbd "C-x 3") (sanityinc/split-window-func-with-other-buffer 'split-window-horizontally))
   ;; Toggle horizontally or vertically split windows
-  (global-set-key (kbd "C-x |") 'my-split-window-horizontally-instead)
-  (global-set-key (kbd "C-x _") 'my-split-window-vertically-instead)
+  (global-set-key (kbd "C-x |") 'sanityinc/split-window-horizontally-instead)
+  (global-set-key (kbd "C-x _") 'sanityinc/split-window-vertically-instead)
   ;; Move focus to help window
   (setq help-window-select t)
   ;; Winner mode: C-c + Left/Right
   (winner-mode 1)
   )
 
-;; Window move: Meta + Arrow
 (progn
+  ;; Window move: Meta + Arrow
   (windmove-default-keybindings 'meta)
   ;; (setq org-replace-disputed-keys t)
   (add-hook 'org-mode-hook
@@ -155,7 +170,6 @@
               ))
   )
 
-;; Winum
 (progn
   ;; Winum: M-1/2/3
   (setq winum-keymap
@@ -181,7 +195,7 @@
 (progn
   ;; Search backspace behavior
   (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
-  ;; show number of matches while searching and replacing
+  ;; Show number of matches while searching and replacing
   (require 'anzu)
   (global-anzu-mode)
   (setq anzu-mode-lighter "")
@@ -241,12 +255,19 @@
 (progn
   ;; Expand region
   (require 'expand-region)
+  (global-set-key (kbd "C-=") 'er/expand-region)
   ;; Ace jump mode
   (require 'ace-jump-mode)
+  (global-set-key (kbd "C-c SPC") 'ace-jump-mode)
+  (setq ace-jump-mode-move-keys
+        (loop for i from ?a to ?z collect i))
   )
 
-;; Very large file
-(require 'vlf)
+(progn
+  ;; Very large file
+  (require 'vlf)
+  )
+
 (defun my-ffap-vlf ()
   "Find file at point with VLF."
   (interactive)
@@ -255,8 +276,8 @@
       (error "File does not exist: %s" file))
     (vlf file)))
 
-;; Yasnippet
 (progn
+  ;; Yasnippet
   (require 'yasnippet)
   (setq yas-snippet-dirs `("~/.emacs.d/snippets"))
   (yas-global-mode 1)
@@ -273,15 +294,14 @@
 ;;------------------------------------------------------------------------------
 ;; Completion
 ;;------------------------------------------------------------------------------
-;; Icomplete
 (progn
+  ;; Icomplete
   (setq completion-ignore-case t)
   (setq read-file-name-completion-ignore-case t)
   (setq read-buffer-completion-ignore-case t)
   (icomplete-mode 1)
   )
 
-;; IDO
 (progn
   ;; IDO for buffer switching only
   (ido-mode 'buffers)
@@ -291,15 +311,13 @@
   (setq ido-completion-buffer nil)
   )
 
-;; Which key
 (progn
   (require 'which-key)
-  (setq which-key-idle-delay 1.0)
+  (setq which-key-idle-delay 0.5)
   (setq which-key-lighter "")
   (which-key-mode)
   )
 
-;; Smex
 (progn
   (require 'smex)
   (setq-default smex-save-file (expand-file-name ".smex-items" user-emacs-directory))
@@ -321,23 +339,21 @@
   (defalias 'yes-or-no-p 'y-or-n-p)
   )
 
-;; Shell
 (progn
-  ;; Make prompts read only
+  ;; Shell: Make prompts read only
   (setq comint-prompt-read-only t)
   (setq comint-scroll-to-bottom-on-input t)
-  ;; Open in current window
+  ;; Shell: Open in current window
   (push (cons "\\*shell\\*" display-buffer--same-window-action) display-buffer-alist)
   )
 
-;; Mode line bell
 (progn
   (require 'mode-line-bell)
   (add-hook 'after-init-hook 'mode-line-bell-mode)
   )
 
-;; Beacon: Highlight cursor location
 (progn
+  ;; Highlight cursor location
   (require 'beacon)
   (setq-default beacon-lighter "")
   (setq-default beacon-size 20)
@@ -347,8 +363,8 @@
 ;;------------------------------------------------------------------------------
 ;; Key Bindings
 ;;------------------------------------------------------------------------------
-;; Unset keys
 (progn
+  ;; Unset keys
   (global-set-key (kbd "C-z") nil) ; suspend-frame
   (global-set-key (kbd "C-x f") nil) ; set-fill-column
   (global-set-key (kbd "C-x C-b") nil) ; list-buffers
@@ -358,34 +374,40 @@
   (global-set-key (kbd "<help>") nil)
   )
 
-(defun sanityinc/newline-at-end-of-line ()
-  "Move to end of line, enter a newline, and reindent."
-  (interactive)
-  (move-end-of-line 1)
-  (newline-and-indent))
-
 (defun sanityinc/open-shell (s)
   "Switch to or create a shell with buffer name s"
   (if (get-buffer s) (switch-to-buffer s) (shell s)))
-(defun shell1 () "" (interactive) (sanityinc/open-shell "*shell*<1>"))
-(defun shell2 () "" (interactive) (sanityinc/open-shell "*shell*<2>"))
-(defun shell3 () "" (interactive) (sanityinc/open-shell "*shell*<3>"))
-(defun shell4 () "" (interactive) (sanityinc/open-shell "*shell*<4>"))
-(defun shell5 () "" (interactive) (sanityinc/open-shell "*shell*<5>"))
 
-;; Keybindings
+(defun sanityinc/bind-key (key func &optional desc)
+  "Bind a key sequence to func, with a which-key description string"
+  (bind-key* key func)
+  (which-key-add-key-based-replacements key desc)
+  )
+
+(defun sanityinc/bind-to-lead-key (key func &optional desc)
+  "Bind a lead key sequence to func, with a which-key description string"
+  (let ((key-seq (concat "C-j " key))) (sanityinc/bind-key key-seq func desc))
+  (let ((key-seq (concat "<f8> " key))) (sanityinc/bind-key key-seq func desc))
+  )
+
 (progn
+  ;; Key Bindings
   (require 'bind-key)
-  (bind-key* "S-<return>" 'sanityinc/newline-at-end-of-line)
-  (bind-key* "C-=" 'er/expand-region)
-  (bind-key* "C-j j" 'ace-jump-mode)
-  (bind-key* "C-j C-j" 'ace-jump-mode)
-  (bind-key* "C-j y" 'yas-insert-snippet)
-  (bind-key* "C-j 1" 'shell1)
-  (bind-key* "C-j 2" 'shell2)
-  (bind-key* "C-j 3" 'shell3)
-  (bind-key* "C-j 4" 'shell4)
-  (bind-key* "C-j 5" 'shell5)
+  ;; Shift + Enter
+  (bind-key* "S-<return>" (lambda() (interactive) (move-end-of-line 1) (newline-and-indent)) "open-line")
+  ;; Yasnippet
+  (sanityinc/bind-to-lead-key "y" 'yas-insert-snippet nil)
+  ;; Rectangle
+  (sanityinc/bind-to-lead-key "r" 'rectangle-mark-mode nil)
+  (sanityinc/bind-to-lead-key "t" 'string-rectangle nil)
+  ;; Shell
+  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell<1>")
+  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell<2>")
+  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell<3>")
+  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell<4>")
+  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell<5>")
+  ;; Remove ^M characters
+  (sanityinc/bind-to-lead-key "m" (lambda() (interactive) (beginning-of-buffer) (replace-string "\r" "")) "remove-^M")
   )
 
 ;;------------------------------------------------------------------------------
@@ -393,17 +415,5 @@
 ;;------------------------------------------------------------------------------
 (when (file-exists-p custom-file)
   (load custom-file))
-
-;;------------------------------------------------------------------------------
-;; My Elisp Utilities
-;;------------------------------------------------------------------------------
-
-;; Remove ^M characters
-(defun my-rm-ctrl-m ()
-  "Remove ^M characters"
-  (interactive)
-  (beginning-of-buffer)
-  (replace-string "" "")
-  )
 
 
