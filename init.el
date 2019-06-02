@@ -12,6 +12,7 @@
 ;;------------------------------------------------------------------------------
 ;; Bootstrap
 ;;------------------------------------------------------------------------------
+
 (progn
   ;;(setq debug-on-error t)
   ;; Mininum version required
@@ -51,6 +52,7 @@
 ;;------------------------------------------------------------------------------
 ;; Theme
 ;;------------------------------------------------------------------------------
+
 (defun sanityinc/reapply-themes ()
   "Forcibly load the themes listed in `custom-enabled-themes'."
   (dolist (theme custom-enabled-themes)
@@ -90,6 +92,7 @@
 ;;------------------------------------------------------------------------------
 ;; GUI Frames
 ;;------------------------------------------------------------------------------
+
 (progn
   (setq inhibit-startup-screen t)
   (setq use-file-dialog nil)
@@ -116,6 +119,7 @@
 ;;------------------------------------------------------------------------------
 ;; Windows
 ;;------------------------------------------------------------------------------
+
 (defun sanityinc/split-window-func-with-other-buffer (split-function)
   (lambda (&optional arg)
     "Split this window and switch to the new window unless ARG is provided."
@@ -192,6 +196,7 @@
 ;;------------------------------------------------------------------------------
 ;; Search
 ;;------------------------------------------------------------------------------
+
 (progn
   ;; Search backspace behavior
   (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
@@ -207,6 +212,7 @@
 ;;------------------------------------------------------------------------------
 ;; Editing Utils
 ;;------------------------------------------------------------------------------
+
 (progn
   ;; Electric pair mode
   (electric-pair-mode t)
@@ -294,6 +300,7 @@
 ;;------------------------------------------------------------------------------
 ;; Completion
 ;;------------------------------------------------------------------------------
+
 (progn
   ;; Icomplete
   (setq completion-ignore-case t)
@@ -327,6 +334,7 @@
 ;;------------------------------------------------------------------------------
 ;; Version Control
 ;;------------------------------------------------------------------------------
+
 (progn
   (require 'magit)
   )
@@ -334,6 +342,7 @@
 ;;------------------------------------------------------------------------------
 ;; Misc
 ;;------------------------------------------------------------------------------
+
 (progn
   ;; Use y/n instead of yes/no
   (defalias 'yes-or-no-p 'y-or-n-p)
@@ -363,6 +372,7 @@
 ;;------------------------------------------------------------------------------
 ;; Key Bindings
 ;;------------------------------------------------------------------------------
+
 (progn
   ;; Unset keys
   (global-set-key (kbd "C-z") nil) ; suspend-frame
@@ -371,6 +381,7 @@
   (global-set-key (kbd "C-x C-k") nil) ; kmacro
   (global-set-key (kbd "C-x C-u") nil) ; upcase-region
   (global-set-key (kbd "C-x C-l") nil) ; downcase-region
+  (global-set-key (kbd "C-x C-SPC") nil) ; pop-global-mark
   (global-set-key (kbd "<help>") nil)
   )
 
@@ -401,11 +412,11 @@
   (sanityinc/bind-to-lead-key "r" 'rectangle-mark-mode nil)
   (sanityinc/bind-to-lead-key "t" 'string-rectangle nil)
   ;; Shell
-  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell<1>")
-  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell<2>")
-  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell<3>")
-  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell<4>")
-  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell<5>")
+  (sanityinc/bind-to-lead-key "1" (lambda() (interactive) (sanityinc/open-shell "*shell*<1>")) "shell-1")
+  (sanityinc/bind-to-lead-key "2" (lambda() (interactive) (sanityinc/open-shell "*shell*<2>")) "shell-2")
+  (sanityinc/bind-to-lead-key "3" (lambda() (interactive) (sanityinc/open-shell "*shell*<3>")) "shell-3")
+  (sanityinc/bind-to-lead-key "4" (lambda() (interactive) (sanityinc/open-shell "*shell*<4>")) "shell-4")
+  (sanityinc/bind-to-lead-key "5" (lambda() (interactive) (sanityinc/open-shell "*shell*<5>")) "shell-5")
   ;; Remove ^M characters
   (sanityinc/bind-to-lead-key "m" (lambda() (interactive) (beginning-of-buffer) (replace-string "\r" "")) "remove-^M")
   )
@@ -413,6 +424,7 @@
 ;;------------------------------------------------------------------------------
 ;; Variables configured via the interactive 'customize' interface
 ;;------------------------------------------------------------------------------
+
 (when (file-exists-p custom-file)
   (load custom-file))
 
