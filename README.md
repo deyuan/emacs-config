@@ -1,10 +1,15 @@
-# emacs-config
-* My emacs configuration: Self-contained, single-file, light-weight.
-* Mininum emacs vertion: 25.1
+## emacs-config
+* My emacs configuration for version 28+
+* Based on `use-package`
+* Main packages
+  * Theme: doom-themes
+  * Edit: evil, evil-collection, ace-jump-mode, anzu
+  * Control: which-key, vertico, marginalia, orderless
+  * Windows: winner, windmove, winum
+  * Directory: neotree
+  * Term: multi-term
+  * Programming: lsp-mode, lsp-ui, flycheck, company
 
-## Cheat Sheet
-* M-\ : delete-horizontal-space : Delete whitespaces before cursor
-* M-^ : delete-indentation : Delete whitespaces from the beginning of this line
+## Usage
+* Copy `init.el` to `~/.emacs.d/`
 
-## References
-* https://github.com/purcell/emacs.d
